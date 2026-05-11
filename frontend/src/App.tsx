@@ -64,6 +64,26 @@ function App() {
     return (
         <main style={{ fontFamily: 'system-ui,sans-serif', maxWidth: 640, margin: '3rem auto', padding: '0 1rem' }}>
             <h1 style={{ marginBottom: '0.5rem' }}>InnoBridge — واجهة SPA منفصلة</h1>
+
+            {import.meta.env.PROD &&
+            (getApiBaseUrl().includes('127.0.0.1') || getApiBaseUrl().includes('localhost')) ? (
+                <p
+                    style={{
+                        background: '#fef2f2',
+                        border: '1px solid #fecaca',
+                        color: '#991b1b',
+                        padding: '0.75rem 1rem',
+                        borderRadius: 8,
+                        marginBottom: '1rem',
+                    }}
+                >
+                    <strong>إعدادات الإنتاج:</strong> هذا البناء لا يزال يوجّه الطلبات إلى عنوان تطوير محلي. في Netlify
+                    عرّف <code>VITE_API_BASE_URL</code> بعنوان Render (مثل <code>https://…onrender.com</code>) ثم
+                    <strong> أعد نشر الموقع</strong> (Rebuild). المتغيرات التي تبدأ بـ <code>VITE_</code> تُدمج وقت
+                    البناء وليس وقت التشغيل.
+                </p>
+            ) : null}
+
             <p style={{ color: '#444', marginTop: 0 }}>
                 عنوان API الخلفي: <code>{getApiBaseUrl()}</code>
                 <br />

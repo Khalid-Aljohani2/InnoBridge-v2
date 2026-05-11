@@ -26,3 +26,11 @@ export function getOptionalSupabaseEnv(): SupabaseEnv | null {
     if (!url || !anonKey) return null;
     return { url: url.replace(/\/$/, ''), anonKey };
 }
+
+/**
+ * Cross-origin cookie/CSRF (Sanctum SPA) needs `true` and matching CORS origins.
+ * Bearer-token API calls usually work with `false`, which avoids stricter CORS.
+ */
+export function getApiWithCredentials(): boolean {
+    return trim(import.meta.env.VITE_API_WITH_CREDENTIALS) === 'true';
+}

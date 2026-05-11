@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 
-import { getApiBaseUrl } from '../../config/env';
+import { getApiBaseUrl, getApiWithCredentials } from '../../config/env';
 
 export interface NormalizedHttpError {
     message: string;
@@ -31,7 +31,7 @@ export const apiClient = axios.create({
         'Content-Type': 'application/json',
     },
     timeout: 30_000,
-    withCredentials: true,
+    withCredentials: getApiWithCredentials(),
 });
 
 apiClient.interceptors.response.use(
