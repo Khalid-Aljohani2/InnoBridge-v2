@@ -62,8 +62,41 @@ function App() {
     }, []);
 
     return (
-        <main style={{ fontFamily: 'system-ui,sans-serif', maxWidth: 640, margin: '3rem auto', padding: '0 1rem' }}>
-            <h1 style={{ marginBottom: '0.5rem' }}>InnoBridge — واجهة SPA منفصلة</h1>
+        <main
+            dir="rtl"
+            lang="ar"
+            style={{
+                fontFamily: 'system-ui, Segoe UI, Roboto, sans-serif',
+                maxWidth: 640,
+                width: '100%',
+                margin: '0 auto',
+                padding: '1.75rem 1rem 3rem',
+                textAlign: 'start',
+                lineHeight: 1.55,
+                boxSizing: 'border-box',
+            }}
+        >
+            <header style={{ marginBottom: '1.25rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.04em', color: '#64748b', marginBottom: 4 }}>
+                    InnoBridge
+                </div>
+                <h1
+                    style={{
+                        fontSize: 'clamp(1.35rem, 4vw, 1.85rem)',
+                        lineHeight: 1.35,
+                        fontWeight: 700,
+                        margin: 0,
+                        letterSpacing: 0,
+                        color: '#0f172a',
+                        wordBreak: 'break-word',
+                    }}
+                >
+                    واجهة SPA منفصلة — فحص الاتصال
+                </h1>
+                <p style={{ margin: '0.5rem 0 0', fontSize: '0.9rem', color: '#64748b', lineHeight: 1.45 }}>
+                    صفحة Netlify هذه للاختبار؛ التسجيل واللوحة على خادم Render (Laravel).
+                </p>
+            </header>
 
             <p style={{ marginTop: '0.25rem', marginBottom: '1rem' }}>
                 <a
@@ -102,36 +135,62 @@ function App() {
                 </p>
             ) : null}
 
-            <p style={{ color: '#0f172a', background: '#e0f2fe', border: '1px solid #7dd3fc', padding: '1rem', borderRadius: 8, marginBottom: '1rem' }}>
-                <strong>ليست «واجهات مفقودة»:</strong> ما تراه على Netlify هو صفحة اختبار فقط. القوائم واللوحات الحقيقية تفتح من
-                الرابط أعلاه (Render / Laravel). لا تكتب عنوان Netlify ومعه عنوان كامل بدون مسافة؛ حتى لا يظهر عنوان مكسور
-                مثل <code style={{ fontSize: '0.8rem' }}>…netlify.apphttps://…</code>.
-                <span style={{ display: 'block', marginTop: '0.75rem' }}>
-                    <a
-                        href={`${getApiBaseUrl()}/login`}
-                        style={{
-                            marginInlineEnd: 12,
-                            color: '#0369a1',
-                            fontWeight: 700,
-                            wordBreak: 'break-all',
-                        }}
-                    >
-                        فتح الدخول على الخادم
-                    </a>
-                    <span style={{ color: '#64748b' }}> — </span>
-                    <a
-                        href={`${getApiBaseUrl()}/dashboard`}
-                        style={{
-                            marginInlineStart: 4,
-                            color: '#0369a1',
-                            fontWeight: 700,
-                            wordBreak: 'break-all',
-                        }}
-                    >
-                        فتح لوحة التحكم على الخادم
-                    </a>
-                </span>
+            <p
+                style={{
+                    color: '#0f172a',
+                    background: '#e0f2fe',
+                    border: '1px solid #7dd3fc',
+                    padding: '1rem',
+                    borderRadius: 8,
+                    marginBottom: '1rem',
+                    lineHeight: 1.6,
+                }}
+            >
+                <strong>ليست مشكلة «واجهات مفقودة»:</strong> هذا الموقع يعرض حالة الاتصال مع الـ API فقط.
+                افتح التطبيق الحقيقي من الزر أو الروابط أسفله (عنوان Render، ليس عنوان Netlify).
             </p>
+            <aside
+                style={{
+                    fontSize: '0.8rem',
+                    color: '#475569',
+                    marginTop: '-0.5rem',
+                    marginBottom: '1rem',
+                    paddingInlineStart: '0.5rem',
+                    borderInlineStart: '3px solid #cbd5e1',
+                }}
+            >
+                تجنّب كتابة نطاق Netlify ولصق عنوان <code lang="en">https://…</code> مباشرة بعده دون مسافة أو سطر جديد؛
+                وإلا استنتج المتصفّح عنوانًا غير صالح.
+            </aside>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+                <span style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.92rem', color: '#374151' }}>
+                    اختصارات
+                </span>
+                <a
+                    href={`${getApiBaseUrl()}/login`}
+                    style={{
+                        marginInlineEnd: 12,
+                        color: '#0369a1',
+                        fontWeight: 700,
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    فتح الدخول على الخادم
+                </a>
+                <span style={{ color: '#64748b' }}> — </span>
+                <a
+                    href={`${getApiBaseUrl()}/dashboard`}
+                    style={{
+                        marginInlineStart: 4,
+                        color: '#0369a1',
+                        fontWeight: 700,
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    فتح لوحة التحكم على الخادم
+                </a>
+            </div>
 
             <p style={{ color: '#444', marginTop: 0 }}>
                 عنوان API الخلفي: <code>{getApiBaseUrl()}</code>
