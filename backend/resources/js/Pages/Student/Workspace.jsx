@@ -3,7 +3,7 @@ import useUiPreferences from '@/hooks/useUiPreferences';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
-export default function Workspace({ team = null, milestones = [] }) {
+export default function Workspace({ team = null, milestones = [], isPendingReview = false }) {
     const { flash } = usePage().props;
     const { isArabic, isDark } = useUiPreferences();
     const [activeMilestoneId, setActiveMilestoneId] = useState(milestones?.[0]?.id ?? null);
@@ -17,7 +17,8 @@ export default function Workspace({ team = null, milestones = [] }) {
                       desc: 'رفع ملفات كل مرحلة ومتابعة قرارات المشرف.',
                       noTeam: 'لا يوجد فريق بعد. أنشئ فريقك أولاً.',
                       goTeam: 'الذهاب لصفحة الفريق',
-                      noProject: 'لم يتم اعتماد تحدي/مشروع بعد. اختر تحديًا وأرسل طلبًا للمشرف.',
+                      noProject: 'لم يتم اعتماد فكرة مشروع أو تحدي صناعة بعد. قم برفع فكرتك أو اختر من تحديات الصناعة وأرسل طلباً للمشرف.',
+                      pendingProject: 'طلبك الخاص بمشروع التخرج / تحدي الصناعة قيد المراجعة والتدقيق حالياً من قبل المشرف. بمجرد الاعتماد، سيتم فتح سجل تسليم المراحل بالكامل هنا.',
                       goChallenges: 'فتح تحديات الصناعة',
                       supervisor: 'المشرف',
                       milestone: 'المرحلة',
@@ -41,7 +42,8 @@ export default function Workspace({ team = null, milestones = [] }) {
                       desc: 'Upload milestone files and track supervisor decisions.',
                       noTeam: 'No team yet. Create your team first.',
                       goTeam: 'Go to Team page',
-                      noProject: 'No approved project yet. Select a challenge and request approval.',
+                      noProject: 'No approved project idea or industry challenge yet. Upload your idea or pick a challenge and request supervisor approval.',
+                      pendingProject: 'Your project idea / industry challenge request is currently under review by the supervisor. Once approved, the full milestone submission log will open here.',
                       goChallenges: 'Open Industry Challenges',
                       supervisor: 'Supervisor',
                       milestone: 'Milestone',
@@ -125,28 +127,37 @@ export default function Workspace({ team = null, milestones = [] }) {
                     <div className="sr-page-shell sr-section-stack">
                         <div className={`${isDark ? 'sr-card-dark' : 'sr-card-light'} p-10 text-center shadow-xl`}>
                             <div className="mb-6 flex justify-center">
-                                <div className="p-5 rounded-full bg-amber-500/10">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.364-6.364l-.707-.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M12 7a5 5 0 015 5 5 5 0 01-5 5 5 5 0 01-5-5 5 5 0 015-5z" />
-                                    </svg>
+                                <div className={`p-5 rounded-full ${isPendingReview ? 'bg-blue-500/10' : 'bg-amber-500/10'}`}>
+                                    {isPendingReview ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-blue-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.364-6.364l-.707-.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M12 7a5 5 0 015 5 5 5 0 01-5 5 5 5 0 01-5-5 5 5 0 015-5z" />
+                                        </svg>
+                                    )}
                                 </div>
                             </div>
                             <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>
-                                {isArabic ? 'بانتظار اعتماد المشروع' : 'Awaiting Project Approval'}
+                                {isPendingReview 
+                                    ? (isArabic ? 'طلبك قيد المراجعة' : 'Under Review')
+                                    : (isArabic ? 'بانتظار اعتماد المشروع' : 'Awaiting Project Approval')
+                                }
                             </h3>
-                            <p className={`${isDark ? 'text-slate-300' : 'text-gray-600'} mb-8 max-w-2xl mx-auto leading-relaxed`}>
-                                {isArabic 
-                                    ? 'لم يتم اعتماد فكرة مشروع أو تحدي صناعة بعد. قم برفع فكرتك أو اختر من تحديات الصناعة وأرسل طلباً للمشرف.'
-                                    : 'No approved project idea or industry challenge yet. Upload your idea or pick a challenge and request supervisor approval.'}
+                            <p className={`${isDark ? 'text-slate-300' : 'text-gray-600'} mb-8 max-w-2xl mx-auto leading-relaxed font-medium`}>
+                                {isPendingReview ? t.pendingProject : t.noProject}
                             </p>
-                            <div className="flex flex-wrap justify-center gap-4">
-                                <Link href={route('student.uploads')} className="sr-btn-action-primary w-auto px-6 py-2.5">
-                                    {isArabic ? 'رفع فكرة المشروع' : 'Upload Project Idea'}
-                                </Link>
-                                <Link href={route('student.industry-challenges')} className="sr-btn-action-secondary w-auto px-6 py-2.5">
-                                    {t.goChallenges}
-                                </Link>
-                            </div>
+                            {!isPendingReview && (
+                                <div className="flex flex-wrap justify-center gap-4">
+                                    <Link href={route('student.uploads')} className="sr-btn-action-primary w-auto px-6 py-2.5">
+                                        {isArabic ? 'رفع فكرة المشروع' : 'Upload Project Idea'}
+                                    </Link>
+                                    <Link href={route('student.industry-challenges')} className="sr-btn-action-secondary w-auto px-6 py-2.5">
+                                        {t.goChallenges}
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

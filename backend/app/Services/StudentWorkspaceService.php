@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\ChallengeRequest;
+use App\Models\IndustryChallenge;
 use App\Models\Milestone;
 use App\Models\Submission;
 use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
-
+ 
 class StudentWorkspaceService
 {
     public function workspaceData(User $student): array
@@ -15,7 +17,7 @@ class StudentWorkspaceService
         $teamId = TeamMember::query()
             ->where('user_id', $student->id)
             ->value('team_id');
-
+ 
         $team = $teamId
             ? Team::with([
                 'leader:id,name,email',
@@ -26,7 +28,7 @@ class StudentWorkspaceService
                 'project.industryChallenge.postedBy:id,name',
             ])->find((int) $teamId)
             : null;
-
+ 
         $projectId = (int) ($team?->project_id ?? 0);
         $milestones = $projectId
             ? Milestone::with(['submissions' => fn ($q) => $q->with('submittedBy:id,name,email')->latest()])
@@ -34,10 +36,28 @@ class StudentWorkspaceService
                 ->orderBy('sequence')
                 ->get()
             : collect();
-
+ 
+        // Check for pending applications to resolve UI ambiguity
+        $isPendingReview = false;
+        if ($teamId) {
+            $hasPendingChallenge = ChallengeRequest::where('team_id', $teamId)
+                ->where('status', 'pending')
+                ->exists();
+            
+            // Also check if any team member has a pending student idea
+            $teamUserIds = TeamMember::where('team_id', $teamId)->pluck('user_id');
+            $hasPendingIdea = IndustryChallenge::whereIn('posted_by_user_id', $teamUserIds)
+                ->where('kind', 'student_idea')
+                ->whereIn('review_status', ['pending_action', 'awaiting_revision'])
+                ->exists();
+ 
+            $isPendingReview = $hasPendingChallenge || $hasPendingIdea;
+        }
+ 
         return [
             'team' => $team,
             'milestones' => $milestones,
+            'isPendingReview' => $isPendingReview,
         ];
     }
 
