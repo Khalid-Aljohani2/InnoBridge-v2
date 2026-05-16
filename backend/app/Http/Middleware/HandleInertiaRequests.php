@@ -82,7 +82,6 @@ class HandleInertiaRequests extends Middleware
 
                 if ($canScopeByStudentIdea) {
                     $counts = IndustryChallenge::query()
-                        ->where('is_active', 'true')
                         ->where('kind', 'student_idea')
                         ->whereIn('review_status', ['pending_action', 'awaiting_revision'])
                         ->groupBy('review_status')
