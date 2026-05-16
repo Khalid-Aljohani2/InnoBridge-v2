@@ -11,6 +11,7 @@ use App\Services\ChallengeReviewService;
 use App\Services\GroupManagementService;
 use App\Services\MilestonePlanService;
 use App\Services\StudentChallengeService;
+use App\Http\Requests\StoreProjectIdeaRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -215,13 +216,9 @@ class ChallengeController extends Controller
         );
     }
 
-    public function store(Request $request)
+    public function store(StoreProjectIdeaRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'file' => 'required|file|mimes:pdf,doc,docx,zip|max:20480',
-        ]);
+        $validated = $request->validated();
         return $this->respondFromServiceResult(
             $this->studentChallengeService->storeInitialSubmission(auth()->user(), $validated)
         );
@@ -334,13 +331,9 @@ class ChallengeController extends Controller
         ]);
     }
 
-    public function uploadStudentSubmission(Request $request)
+    public function uploadStudentSubmission(StoreProjectIdeaRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'file' => 'required|file|mimes:pdf,doc,docx,zip|max:20480',
-        ]);
+        $validated = $request->validated();
         return $this->respondFromServiceResult(
             $this->studentChallengeService->uploadSubmission(auth()->user(), $validated)
         );

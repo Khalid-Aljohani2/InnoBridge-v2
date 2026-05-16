@@ -3,7 +3,7 @@ import useUiPreferences from '@/hooks/useUiPreferences';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
-export default function HodIndustryChallenges({ pendingCompanyChallenges = [], awaitingPublicationChallenges = [] }) {
+export default function HodIndustryChallenges({ pendingCompanyChallenges = [], awaitingPublicationChallenges = [], userRole = 'hod' }) {
     const { flash } = usePage().props;
     const { isArabic, isDark } = useUiPreferences();
     const [industryNotesById, setIndustryNotesById] = useState({});
@@ -14,7 +14,7 @@ export default function HodIndustryChallenges({ pendingCompanyChallenges = [], a
                 ? {
                       title: 'مراجعة تحديات الصناعة',
                       desc: 'اقبل أو ارفض طلب الشركة أولاً. بعد القبول، اضغط «عرض للطلاب» عند الجاهزية — حتى ذلك الحين لا يظهر التحدي في قائمة الطلاب.',
-                      pendingTitle: 'بانتظار قرارك (قبول / رفض)',
+                      pendingTitle: userRole === 'supervisor' ? 'بانتظار قرارك (قبول / رفض)' : 'تم قبولها من قبل مشرفي الطلاب (للاطلاع)',
                       awaitingTitle: 'مقبولة — بانتظار العرض للطلاب',
                       company: 'جهة الصناعة',
                       approveChallenge: 'قبول الطلب',
@@ -27,7 +27,7 @@ export default function HodIndustryChallenges({ pendingCompanyChallenges = [], a
                 : {
                       title: 'Industry challenge review',
                       desc: 'Accept or reject the company submission first. After acceptance, click “Show to students” when ready — until then students will not see the challenge.',
-                      pendingTitle: 'Awaiting your decision (accept / reject)',
+                      pendingTitle: userRole === 'supervisor' ? 'Awaiting your decision (accept / reject)' : 'Accepted by supervisors (View Mode)',
                       awaitingTitle: 'Accepted — awaiting publication to students',
                       company: 'Posted by',
                       approveChallenge: 'Accept request',
@@ -80,31 +80,37 @@ export default function HodIndustryChallenges({ pendingCompanyChallenges = [], a
                             </div>
                             <div className="flex w-full min-w-[260px] max-w-lg flex-col gap-2">
                                 {variant === 'pending' ? (
-                                    <>
-                                        <textarea
-                                            value={industryNotesById[c.id] || ''}
-                                            onChange={(e) => setIndustryNotesById((p) => ({ ...p, [c.id]: e.target.value }))}
-                                            rows={2}
-                                            placeholder={t.notes}
-                                            className={`w-full rounded-xl text-sm ${isDark ? 'bg-slate-900 border-slate-600 text-slate-100' : 'border-gray-300'}`}
-                                        />
-                                        <div className="flex flex-wrap gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => reviewIndustryChallenge(c.id, 'approve')}
-                                                className="sr-btn-action bg-green-600 text-white hover:bg-green-700 w-auto px-4 text-xs"
-                                            >
-                                                {t.approveChallenge}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => reviewIndustryChallenge(c.id, 'reject')}
-                                                className="sr-btn-action-danger w-auto px-4 text-xs"
-                                            >
-                                                {t.rejectChallenge}
-                                            </button>
+                                    userRole === 'supervisor' || userRole === 'admin' ? (
+                                        <>
+                                            <textarea
+                                                value={industryNotesById[c.id] || ''}
+                                                onChange={(e) => setIndustryNotesById((p) => ({ ...p, [c.id]: e.target.value }))}
+                                                rows={2}
+                                                placeholder={t.notes}
+                                                className={`w-full rounded-xl text-sm ${isDark ? 'bg-slate-900 border-slate-600 text-slate-100' : 'border-gray-300'}`}
+                                            />
+                                            <div className="flex flex-wrap gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => reviewIndustryChallenge(c.id, 'approve')}
+                                                    className="sr-btn-action bg-green-600 text-white hover:bg-green-700 w-auto px-4 text-xs"
+                                                >
+                                                    {t.approveChallenge}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => reviewIndustryChallenge(c.id, 'reject')}
+                                                    className="sr-btn-action-danger w-auto px-4 text-xs"
+                                                >
+                                                    {t.rejectChallenge}
+                                                </button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex h-full items-center justify-end">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${isDark ? 'bg-slate-800 border-slate-600 text-slate-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>Read Only</span>
                                         </div>
-                                    </>
+                                    )
                                 ) : (
                                     <button
                                         type="button"

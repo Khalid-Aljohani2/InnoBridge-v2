@@ -90,9 +90,18 @@ class PortalController extends Controller
             set_time_limit(120);
         }
 
+        $user = $request->user();
+
+        // Supervisor sees 'pending_action' requests to review
+        // HoD sees 'approved' requests that supervisors have already accepted
+        $pendingChallenges = $user->role === 'supervisor'
+            ? $this->challengeWorkflowService->queryCompanyChallengesPendingHoD()->get()
+            : $this->challengeWorkflowService->queryCompanyChallengesApproved()->get();
+
         return Inertia::render('Supervisor/HodIndustryChallenges', [
-            'pendingCompanyChallenges' => $this->challengeWorkflowService->queryCompanyChallengesPendingHoD()->get(),
+            'pendingCompanyChallenges' => $pendingChallenges,
             'awaitingPublicationChallenges' => $this->challengeWorkflowService->queryCompanyChallengesAwaitingStudentPublication()->get(),
+            'userRole' => $user->role,
         ]);
     }
 
@@ -116,8 +125,8 @@ class PortalController extends Controller
         ]);
 
         $user = $request->user();
-        if (! in_array($user?->role, ['hod', 'admin'], true)) {
-            return back()->with('error', 'Forbidden');
+        if (! in_array($user?->role, ['supervisor', 'admin'], true)) {
+            abort(403, 'Unauthorized action. Only supervisors can accept or reject industry challenges.');
         }
 
         $result = $this->challengeWorkflowService->hodReviewCompanyChallenge(

@@ -203,6 +203,18 @@ export default function StudentUploads({ project = null, milestonePath = [] }) {
                         {flash?.error ? (
                             <div className="sr-alert-error mb-3 !rounded-xl !px-3 !py-2 text-sm">{flash.error}</div>
                         ) : null}
+                        {errors.team ? (
+                            <div className="mb-3 rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100">
+                                <strong className="block font-bold">تنبيه يخص الفريق:</strong>
+                                {errors.team}
+                            </div>
+                        ) : null}
+                        {errors.supervisor ? (
+                            <div className="mb-3 rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100">
+                                <strong className="block font-bold">تنبيه يخص المشرف:</strong>
+                                {errors.supervisor}
+                            </div>
+                        ) : null}
                         <form onSubmit={submit} className="space-y-3">
                             <div>
                                 <label className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>{t.projectTitle}</label>
