@@ -12,7 +12,25 @@ class StoreProjectIdeaRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->role === 'student';
+        if (!auth()->check() || auth()->user()->role !== 'student') {
+            return false;
+        }
+
+        $user = auth()->user();
+        $teamMember = TeamMember::where('user_id', $user->id)->with('team')->first();
+
+        // Must have a team
+        if (!$teamMember || !$teamMember->team) {
+            return false;
+        }
+
+        // Team must be approved and have a supervisor
+        $team = $teamMember->team;
+        if (empty($team->supervisor_id) || $team->review_status !== 'approved') {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -38,25 +56,12 @@ class StoreProjectIdeaRequest extends FormRequest
             // Fetch the student's team and its members
             $teamMember = TeamMember::where('user_id', $user->id)->with('team.members')->first();
 
-            // 1. Must be in a team
-            if (!$teamMember || !$teamMember->team) {
-                $validator->errors()->add('team', 'عذراً، يجب عليك إنشاء فريق أو الانضمام إليه أولاً قبل رفع فكرة المشروع.');
-                return;
-            }
-
             $team = $teamMember->team;
             $membersCount = $team->members->count();
 
             // 2. Team Constraints (Min: 2, Max: 4)
             if ($membersCount < 2 || $membersCount > 4) {
                 $validator->errors()->add('team', "لا يمكن رفع الفكرة. يجب أن يتكون الفريق من طالبين كحد أدنى و4 كحد أقصى (العدد الحالي: {$membersCount}).");
-            }
-
-            // 3. Supervision Constraint (Must have a supervisor and must be approved by HoD)
-            if (empty($team->supervisor_id)) {
-                $validator->errors()->add('supervisor', 'لا يمكن رفع الفكرة. لم يتم تعيين مشرف لفريقك بعد.');
-            } elseif ($team->review_status !== 'approved') {
-                $validator->errors()->add('supervisor', 'لا يمكن رفع الفكرة. المشرف أو الفريق الحالي بانتظار الاعتماد من قبل رئيس القسم.');
             }
         });
     }

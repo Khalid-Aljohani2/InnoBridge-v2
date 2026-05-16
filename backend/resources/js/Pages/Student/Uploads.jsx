@@ -36,7 +36,7 @@ const resolveSimilarityBand = (percent, tier) => {
     return 'unknown';
 };
 
-export default function StudentUploads({ project = null, milestonePath = [] }) {
+export default function StudentUploads({ project = null, milestonePath = [], team = null }) {
     const { isArabic, isDark } = useUiPreferences();
     const { flash } = usePage().props;
     const parseAiReviewFromProject = () => {
@@ -95,6 +95,9 @@ export default function StudentUploads({ project = null, milestonePath = [] }) {
               workspaceHintTitle: 'تسليم المراحل للمشرف',
               workspaceHintBody: 'بعد رفع الفكرة، ارفع تسليمات المراحل من مساحة العمل حتى تظهر للمشرف للمراجعة.',
               goToWorkspace: 'الانتقال إلى مساحة العمل',
+              lockedTitle: 'ميزة الرفع مقفلة حالياً',
+              lockedMessage: 'يجب أولاً تكوين فريقك، وانتظار اعتماد رئيس القسم، وتعيين مشرف لتتمكن من رفع فكرة المشروع.',
+              goToTeam: 'الانتقال لصفحة الفريق',
           }
         : {
               title: 'Idea & Documents Upload',
@@ -126,7 +129,12 @@ export default function StudentUploads({ project = null, milestonePath = [] }) {
               workspaceHintTitle: 'Milestone submissions for supervisor',
               workspaceHintBody: 'After uploading your idea, submit milestone files from Workspace so the supervisor can review them.',
               goToWorkspace: 'Go to Workspace',
+              lockedTitle: 'Upload feature is currently locked',
+              lockedMessage: 'You must first form a team, wait for HoD approval, and have a supervisor assigned before uploading a project idea.',
+              goToTeam: 'Go to My Team',
           };
+
+    const isLocked = !project && (!team || !team.supervisor_id || team.review_status !== 'approved');
 
     const submit = (e) => {
         e.preventDefault();
@@ -193,65 +201,88 @@ export default function StudentUploads({ project = null, milestonePath = [] }) {
                     ) : null}
                     <section className={`xl:col-span-2 p-5 ${isDark ? 'sr-card-dark' : 'sr-card-light'}`}>
                         <h3 className={`sr-subtitle mb-4 ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>{t.formTitle}</h3>
-                        <div className={`mb-4 rounded-xl border p-3 ${isDark ? 'border-indigo-700 bg-indigo-950/30 text-indigo-100' : 'border-indigo-200 bg-indigo-50 text-indigo-900'}`}>
-                            <p className="text-sm font-bold">{t.workspaceHintTitle}</p>
-                            <p className="mt-1 text-xs opacity-90">{t.workspaceHintBody}</p>
-                            <Link href={route('student.workspace')} className="mt-2 inline-flex rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700">
-                                {t.goToWorkspace}
-                            </Link>
-                        </div>
-                        {flash?.error ? (
-                            <div className="sr-alert-error mb-3 !rounded-xl !px-3 !py-2 text-sm">{flash.error}</div>
-                        ) : null}
-                        {errors.team ? (
-                            <div className="mb-3 rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100">
-                                <strong className="block font-bold">تنبيه يخص الفريق:</strong>
-                                {errors.team}
+                        {isLocked ? (
+                            <div className={`rounded-xl border p-6 text-center shadow-sm ${isDark ? 'bg-amber-950/40 border-amber-500/50 text-amber-100' : 'bg-amber-50 border-amber-200 text-amber-900'}`}>
+                                <div className="mb-3 flex justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                </div>
+                                <h4 className="font-bold text-lg mb-2">{t.lockedTitle}</h4>
+                                <p className="text-sm leading-relaxed mb-4 max-w-md mx-auto opacity-90">{t.lockedMessage}</p>
+                                <Link
+                                    href={route('student.team')}
+                                    className={`inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-bold shadow-sm transition-all ${
+                                        isDark ? 'bg-amber-500 text-amber-950 hover:bg-amber-400' : 'bg-amber-600 text-white hover:bg-amber-700'
+                                    }`}
+                                >
+                                    {t.goToTeam}
+                                </Link>
                             </div>
-                        ) : null}
-                        {errors.supervisor ? (
-                            <div className="mb-3 rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100">
-                                <strong className="block font-bold">تنبيه يخص المشرف:</strong>
-                                {errors.supervisor}
-                            </div>
-                        ) : null}
-                        <form onSubmit={submit} className="space-y-3">
-                            <div>
-                                <label className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>{t.projectTitle}</label>
-                                <input
-                                    value={data.title}
-                                    onChange={(e) => setData('title', e.target.value)}
-                                    className={`mt-1 w-full rounded-xl ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'border-gray-300'}`}
-                                />
-                                {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
-                            </div>
-                            <div>
-                                <label className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>{t.projectDesc}</label>
-                                <textarea
-                                    value={data.description}
-                                    onChange={(e) => setData('description', e.target.value)}
-                                    rows={4}
-                                    className={`mt-1 w-full rounded-xl ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'border-gray-300'}`}
-                                />
-                                {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
-                            </div>
-                            <div>
-                                <label className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>{t.file}</label>
-                                <input
-                                    type="file"
-                                    onChange={(e) => setData('file', e.target.files?.[0] || null)}
-                                    className={`mt-1 w-full rounded-xl ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'border-gray-300'}`}
-                                />
-                                {errors.file && <p className="text-xs text-red-500 mt-1">{errors.file}</p>}
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="sr-btn-action-primary w-auto px-5 disabled:opacity-60"
-                            >
-                                {t.send}
-                            </button>
-                        </form>
+                        ) : (
+                            <>
+                                <div className={`mb-4 rounded-xl border p-3 ${isDark ? 'border-indigo-700 bg-indigo-950/30 text-indigo-100' : 'border-indigo-200 bg-indigo-50 text-indigo-900'}`}>
+                                    <p className="text-sm font-bold">{t.workspaceHintTitle}</p>
+                                    <p className="mt-1 text-xs opacity-90">{t.workspaceHintBody}</p>
+                                    <Link href={route('student.workspace')} className="mt-2 inline-flex rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700">
+                                        {t.goToWorkspace}
+                                    </Link>
+                                </div>
+                                {flash?.error ? (
+                                    <div className="sr-alert-error mb-3 !rounded-xl !px-3 !py-2 text-sm">{flash.error}</div>
+                                ) : null}
+                                {errors.team ? (
+                                    <div className="mb-3 rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100">
+                                        <strong className="block font-bold">تنبيه يخص الفريق:</strong>
+                                        {errors.team}
+                                    </div>
+                                ) : null}
+                                {errors.supervisor ? (
+                                    <div className="mb-3 rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100">
+                                        <strong className="block font-bold">تنبيه يخص المشرف:</strong>
+                                        {errors.supervisor}
+                                    </div>
+                                ) : null}
+                                <form onSubmit={submit} className="space-y-3">
+                                    <div>
+                                        <label className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>{t.projectTitle}</label>
+                                        <input
+                                            value={data.title}
+                                            onChange={(e) => setData('title', e.target.value)}
+                                            className={`mt-1 w-full rounded-xl ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'border-gray-300'}`}
+                                        />
+                                        {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
+                                    </div>
+                                    <div>
+                                        <label className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>{t.projectDesc}</label>
+                                        <textarea
+                                            value={data.description}
+                                            onChange={(e) => setData('description', e.target.value)}
+                                            rows={4}
+                                            className={`mt-1 w-full rounded-xl ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'border-gray-300'}`}
+                                        />
+                                        {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
+                                    </div>
+                                    <div>
+                                        <label className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>{t.file}</label>
+                                        <input
+                                            type="file"
+                                            onChange={(e) => setData('file', e.target.files?.[0] || null)}
+                                            className={`mt-1 w-full rounded-xl ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'border-gray-300'}`}
+                                        />
+                                        {errors.file && <p className="text-xs text-red-500 mt-1">{errors.file}</p>}
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="sr-btn-action-primary w-auto px-5 disabled:opacity-60"
+                                    >
+                                        {t.send}
+                                    </button>
+                                </form>
+                            </>
+                        )}
                     </section>
 
                     <section className={`p-5 ${isDark ? 'sr-card-dark' : 'sr-card-light'}`}>

@@ -325,9 +325,12 @@ class ChallengeController extends Controller
             ->latest()
             ->first();
 
+        $teamMember = \App\Models\TeamMember::where('user_id', auth()->id())->with('team')->first();
+
         return inertia('Student/Uploads', [
             'project' => $project,
             'milestonePath' => $project ? $this->milestonePlanService->planMilestonesForStudentView($project) : [],
+            'team' => $teamMember ? $teamMember->team : null,
         ]);
     }
 

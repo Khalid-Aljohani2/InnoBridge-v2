@@ -9,7 +9,6 @@ export default function Team({
     pendingInvitations = [],
     availableTeams = [],
     teamJoinEnabled = true,
-    hasStudentIdeaUploaded = false,
 }) {
     const { flash, auth } = usePage().props;
     const { isArabic, isDark } = useUiPreferences();
@@ -56,8 +55,6 @@ export default function Team({
                       leave: 'مغادرة الفريق',
                       leaderOnly: 'هذا الإجراء متاح لقائد الفريق فقط.',
                       nameRequired: 'اكتب اسم الفريق قبل الإنشاء.',
-                      ideaRequiredBanner: 'يجب رفع فكرة المشروع من صفحة «رفع الملفات» قبل إنشاء فريق.',
-                      goUploads: 'الذهاب لصفحة رفع الملفات',
                       supervisor: 'المشرف',
                       teamStatus: 'حالة اعتماد الفريق',
                       approved: 'معتمد',
@@ -107,8 +104,6 @@ export default function Team({
                       leave: 'Leave team',
                       leaderOnly: 'Only the team leader can do this action.',
                       nameRequired: 'Enter a team name before creating.',
-                      ideaRequiredBanner: 'Upload your project idea on the Uploads page before creating a team.',
-                      goUploads: 'Go to Uploads',
                       supervisor: 'Supervisor',
                       teamStatus: 'Team approval status',
                       approved: 'Approved',
@@ -154,9 +149,6 @@ export default function Team({
     const createTeam = (e) => {
         e.preventDefault();
         createForm.clearErrors();
-        if (!hasStudentIdeaUploaded) {
-            return;
-        }
         const trimmed = String(createForm.data.name || '').trim();
         if (!trimmed) {
             createForm.setError('name', t.nameRequired);
@@ -286,37 +278,20 @@ export default function Team({
                     {!team ? (
                         <div className={`${isDark ? 'sr-card-dark' : 'sr-card-light'} p-6`}>
                             <p className={`${isDark ? 'text-slate-200' : 'text-gray-700'} mb-4`}>{t.noTeam}</p>
-                            {!hasStudentIdeaUploaded ? (
-                                <div
-                                    className={`mb-4 rounded-xl border px-4 py-3 text-sm font-semibold ${
-                                        isDark ? 'border-amber-500/50 bg-amber-950/40 text-amber-100' : 'border-amber-200 bg-amber-50 text-amber-950'
-                                    }`}
-                                >
-                                    <p className="leading-relaxed">{t.ideaRequiredBanner}</p>
-                                    <Link
-                                        href={route('student.uploads')}
-                                        className={`mt-2 inline-block font-bold underline decoration-2 underline-offset-2 ${
-                                            isDark ? 'text-cyan-300' : 'text-blue-700'
-                                        }`}
-                                    >
-                                        {t.goUploads}
-                                    </Link>
-                                </div>
-                            ) : null}
                             <form onSubmit={createTeam} className="flex flex-col sm:flex-row gap-3">
                                 <div className="flex-1 flex flex-col gap-1">
                                     <input
                                         value={createForm.data.name}
                                         onChange={(e) => createForm.setData('name', e.target.value)}
                                         placeholder={t.teamName}
-                                        disabled={!hasStudentIdeaUploaded || createForm.processing}
-                                        className={`w-full rounded-xl ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'border-gray-300'} ${!hasStudentIdeaUploaded ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                        disabled={createForm.processing}
+                                        className={`w-full rounded-xl ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'border-gray-300'}`}
                                     />
                                     <InputError message={createForm.errors.name} />
                                 </div>
                                 <button
                                     type="submit"
-                                    disabled={createForm.processing || !hasStudentIdeaUploaded}
+                                    disabled={createForm.processing}
                                     className="sr-btn-action-primary w-auto px-5 disabled:opacity-60 h-[42px] shrink-0 self-start"
                                 >
                                     {createForm.processing ? t.creating : t.create}

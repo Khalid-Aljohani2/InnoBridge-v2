@@ -63,13 +63,6 @@ class TeamService
             return ['ok' => false, 'message' => 'Forbidden'];
         }
 
-        if (! $this->studentHasUploadedIdea($student)) {
-            return [
-                'ok' => false,
-                'message' => 'يجب رفع فكرة المشروع من صفحة «رفع الملفات» قبل إنشاء فريق.',
-            ];
-        }
-
         $alreadyInTeam = TeamMember::where('user_id', $student->id)->exists();
         if ($alreadyInTeam) {
             return ['ok' => false, 'message' => 'You are already in a team'];
